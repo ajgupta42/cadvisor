@@ -24,6 +24,7 @@ import (
 	"github.com/google/cadvisor/manager"
 	"github.com/google/cadvisor/storage"
 	"github.com/google/cadvisor/storage/bigquery"
+	"github.com/google/cadvisor/storage/graphite"
 	"github.com/google/cadvisor/storage/influxdb"
 	"github.com/google/cadvisor/storage/memory"
 )
@@ -79,7 +80,17 @@ func NewStorageDriver(driverName string) (*memory.InMemoryStorage, error) {
 			*argDbTable,
 			*argDbName,
 		)
-
+	case "graphite":
+		var hostname string
+		hostname, err = os.Hostname()
+		if err != nil {
+			return nil, err
+		}
+		backendStorage, err = graphite.New(
+			hostname,
+			*argDbHost,
+			*argDbName,
+		)
 	default:
 		err = fmt.Errorf("unknown database driver: %v", *argDbDriver)
 	}
